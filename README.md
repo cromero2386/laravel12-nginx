@@ -1,52 +1,315 @@
-# Docker, Laravel, Nginx, MySQL8
+# Docker, Laravel, React, Nginx, MySQL8 - Multiplataforma (Windows/Linux)
 
-How to create a Laravel project from scratch with Docker
+Proyecto Full-Stack con Laravel (Backend) y React+Vite (Frontend) usando Docker, optimizado para compatibilidad Windows/Linux.
 
-## Environment settings
+## 🚀 Características
 
-1. Create the `.env` file by making a copy of `.env.example`.
+- **Backend:** Laravel 11 con PHP 8.2
+- **Frontend:** React 19 + Vite + TypeScript + Material-UI
+- **Base de datos:** MySQL 8.0
+- **Servidor web:** Nginx
+- **Compatible:** Windows y Linux
+- **Hot Reload:** Habilitado para desarrollo
 
-```bash
-    #Executed from the linux console
-    sudo cp .env.example .env
-```
+## 📋 Requisitos Previos
 
-2. Give permission to the folder `docker_stack`.
+- Docker Desktop instalado y ejecutándose
+- Git (opcional)
 
-```bash
-    #Executed from the linux console
-    sudo chmod 777 -R docker_stack
-```
+## ⚙️ Configuración del Entorno
 
-3. Fill in the values of each environment variable
-
-```bash
-    MYSQL_DATABASE=
-    MYSQL_USER=
-    MYSQL_PASSWORD=
-    MYSQL_ROOT_PASSWORD=
-```
-
-4. Create a `src` folder where the code of your app will persist and give it permissions
+### 1. Clonar o descargar el proyecto
 
 ```bash
-    #Executed from the linux console
-    sudo mkdir src
-    sudo chmod 777 -R src
+git clone <repository-url>
+cd apuesta-digital-docker
 ```
-5. Create React Frontend (Vite)
+
+### 2. Configuración de variables de entorno
+
+El archivo `.env` ya está configurado con valores por defecto:
+```bash
+MYSQL_DATABASE=apuesta
+MYSQL_USER=admin
+MYSQL_PASSWORD=admin
+MYSQL_ROOT_PASSWORD=admin
+```
+
+El archivo `frontend/.env` está configurado para desarrollo:
+```bash
+VITE_API_BASE_URL=http://server-nginx
+```
+
+## 🚀 Ejecución del proyecto
+
+### Opción 1: Scripts automatizados
+
+#### En Windows (PowerShell):
+```powershell
+.\start-project.ps1
+```
+
+#### En Linux/Mac (Bash):
+```bash
+chmod +x start-project.sh
+./start-project.sh
+```
+
+### Opción 2: Comandos Docker Compose manuales
 
 ```bash
-    #Executed from the linux console
-    mkdir frontend
+# Limpiar contenedores existentes
+docker compose down -v
 
-    docker run --rm -v "$PWD/frontend":/app -w /app node:20-alpine sh -c "npm create vite@latest . -- --template react"
+# Construir y ejecutar todos los servicios
+docker compose up --build
 
-    docker run --rm -v "$PWD/frontend":/app -w /app node:20-alpine sh -c "npm install"
+# Ejecutar en segundo plano
+docker compose up --build -d
+```
 
-    sudo chmod 777 -R frontend
+### Opción 3: Ejecutar servicios individuales
+
+```bash
+# Solo el frontend
+docker compose up --build frontend
+
+# Solo el backend (PHP + Nginx + MySQL)
+docker compose up --build server-nginx php82 mysql8
+```
+
+## 🌐 Servicios disponibles
+
+Una vez iniciados los contenedores:
+
+- **Frontend (React):** [http://localhost:5173](http://localhost:5173)
+- **Backend (Laravel):** [http://localhost:8081](http://localhost:8081)
+- **Base de datos MySQL:** `localhost:3310`
+
+## 🛠️ Comandos útiles
+
+### Ver logs de los servicios
+```bash
+# Logs de todos los servicios
+docker compose logs -f
+
+# Logs de un servicio específico
+docker compose logs -f frontend
+docker compose logs -f server-nginx
+docker compose logs -f php82
+docker compose logs -f mysql8
+```
+
+### Ejecutar comandos dentro de los contenedores
+```bash
+# Entrar al contenedor PHP para ejecutar comandos Laravel
+docker compose exec php82 bash
+
+# Instalar dependencias de Composer
+docker compose exec php82 composer install
+
+# Ejecutar migraciones
+docker compose exec php82 php artisan migrate
+
+# Entrar al contenedor frontend
+docker compose exec frontend sh
+
+# Instalar nuevos paquetes npm
+docker compose exec frontend npm install [paquete]
+```
+
+### Base de datos
+```bash
+# Conectar a MySQL
+docker compose exec mysql8 mysql -u admin -p apuesta
+
+# Backup de la base de datos
+docker compose exec mysql8 mysqldump -u admin -p apuesta > backup.sql
+
+# Restaurar backup
+docker compose exec -T mysql8 mysql -u admin -p apuesta < backup.sql
+```
+
+## 🔧 Desarrollo
+
+### Estructura del proyecto
+```
+apuesta-digital-docker/
+├── frontend/                 # Aplicación React
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.ts
+├── src/                      # Aplicación Laravel
+│   ├── app/
+│   ├── routes/
+│   └── composer.json
+├── docker_stack/             # Configuraciones Docker
+│   ├── nginx/
+│   ├── php/
+│   └── react/
+├── docker-compose.yml        # Configuración principal
+└── .env                      # Variables de entorno
+```
+
+### Hot Reload
+
+- **Frontend:** Vite está configurado con hot reload automático
+- **Backend:** Los cambios en PHP se reflejan automáticamente
+
+### Troubleshooting
+
+#### Problema: Frontend no arranca
+```bash
+# Reconstruir solo el frontend
+docker compose build --no-cache frontend
+docker compose up frontend
+```
+
+#### Problema: Permisos en Windows
+```bash
+# Limpiar volúmenes
+docker compose down -v
+docker volume prune -f
+docker compose up --build
+```
+
+#### Problema: Puerto ocupado
+```bash
+# Verificar puertos en uso
+netstat -an | findstr ":5173"  # Windows
+lsof -i :5173                  # Linux/Mac
+
+# Cambiar puertos en docker-compose.yml si es necesario
+```
+
+## 🐛 Solución de problemas comunes
+
+### Windows específicos
+
+1. **WSL2 requerido:** Asegúrate de tener WSL2 habilitado
+2. **Memoria insuficiente:** Aumenta la memoria asignada a Docker Desktop
+3. **Firewall:** Permite Docker Desktop en el firewall de Windows
+
+### Linux específicos
+
+1. **Permisos Docker:** Añade tu usuario al grupo docker
+   ```bash
+   sudo usermod -aG docker $USER
+   ```
+2. **Memoria:** Libera memoria si el build falla
+   ```bash
+   docker system prune -a
+   ```
+
+## 📝 Notas de desarrollo
+
+- Los `node_modules` se mantienen en un volumen Docker para evitar problemas de permisos entre Windows/Linux
+- Vite está configurado con polling para detectar cambios en sistemas de archivos montados
+- Las dependencias de Rollup están optimizadas para múltiples arquitecturas
+
+## 🚫 Detener el proyecto
+
+```bash
+# Detener servicios
+docker compose down
+
+# Detener y eliminar volúmenes
+docker compose down -v
+
+# Limpiar completamente
+docker compose down -v --rmi all
+```
+
+## Acceso a los servicios
+
+- **Frontend (React + Vite)**: http://localhost:5173
+- **Backend (Laravel + Nginx)**: http://localhost:8081
+- **Base de datos MySQL**: localhost:3310
+
+## Estructura del proyecto
 
 ```
+apuesta-digital-docker/
+├── docker-compose.yml          # Configuración de servicios Docker
+├── .env                        # Variables de entorno
+├── start.ps1                   # Script de inicio para Windows
+├── start.sh                    # Script de inicio para Linux/Mac
+├── docker_stack/               # Configuraciones de Docker
+│   ├── nginx/                  # Configuración de Nginx
+│   ├── php/                    # Configuración de PHP-FPM
+│   ├── react/                  # Dockerfile para React
+│   └── mysql/                  # Logs de MySQL
+├── frontend/                   # Aplicación React + TypeScript
+│   ├── src/                    # Código fuente del frontend
+│   ├── package.json            # Dependencias de Node.js
+│   ├── vite.config.ts          # Configuración de Vite
+│   └── .env                    # Variables de entorno del frontend
+└── src/                        # Aplicación Laravel
+    ├── app/                    # Código de la aplicación
+    ├── config/                 # Configuraciones
+    ├── database/               # Migraciones y seeders
+    └── routes/                 # Rutas de la API
+```
+
+## Solución de problemas comunes
+
+### Problema con permisos en Windows
+Si encuentras errores de permisos:
+1. Asegúrate de que Docker Desktop esté ejecutándose como administrador
+2. Habilita la compartición de unidades en Docker Desktop
+3. Usa el script PowerShell `start.ps1`
+
+### Problemas con node_modules
+El proyecto usa volúmenes nombrados para `node_modules` para evitar conflictos de permisos entre Windows y Linux.
+
+### Frontend no se actualiza automáticamente
+Vite está configurado con polling para detectar cambios en Windows:
+```typescript
+watch: {
+  usePolling: true,
+  interval: 1000,
+}
+```
+
+### Reconstruir contenedores
+Si necesitas reconstruir completamente:
+```bash
+docker-compose down -v
+docker system prune -f
+docker-compose up --build --force-recreate
+```
+
+## Desarrollo
+
+### Comandos útiles
+
+```bash
+# Ver logs de un servicio específico
+docker-compose logs frontend
+docker-compose logs php82
+
+# Ejecutar comandos dentro de un contenedor
+docker-compose exec php82 bash
+docker-compose exec frontend sh
+
+# Detener servicios
+docker-compose down
+
+# Detener servicios y eliminar volúmenes
+docker-compose down -v
+```
+
+### Hot Reload
+El hot reload está habilitado para el frontend. Los cambios en el código se reflejarán automáticamente en el navegador.
+
+## Características implementadas para compatibilidad multiplataforma
+
+1. **Volúmenes separados**: `node_modules` en volumen nombrado para evitar conflictos de permisos
+2. **Polling de archivos**: Configurado en Vite para Windows
+3. **Scripts de inicio**: Específicos para PowerShell y Bash
+4. **Dockerfile optimizado**: Con dependencias para múltiples arquitecturas
+5. **Variables de entorno**: Configuración centralizada
+6. **Hot Module Replacement**: Configurado para funcionar en contenedores
 
 5. Configure vite.config.js in frontend (if necessary)
 

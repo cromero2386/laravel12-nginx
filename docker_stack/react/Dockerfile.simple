@@ -1,0 +1,22 @@
+# Dockerfile simplificado para pruebas rápidas
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias básicas
+RUN apk add --no-cache python3 make g++
+
+# Copiar archivos de configuración
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install --legacy-peer-deps
+
+# Copiar código fuente
+COPY . .
+
+# Exponer puerto
+EXPOSE 5173
+
+# Comando de desarrollo
+CMD ["npm", "run", "dev"]
