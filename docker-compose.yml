@@ -10,7 +10,7 @@ services:
     ports:
       - 8081:80
     volumes:
-      - ./src:/var/www/html
+      - ./backend:/var/www/html
     networks:
       - laravel
   php82:
