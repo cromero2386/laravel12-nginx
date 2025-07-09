@@ -18,7 +18,7 @@ services:
       context: ./docker_stack/php/.
     container_name: php82
     volumes:
-      - ./src:/var/www/html
+      - ./backend:/var/www/html
       - ./docker_stack/php/php.ini:/usr/local/etc/php/php.ini
     networks:
       - laravel
