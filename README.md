@@ -68,9 +68,13 @@ docker compose run --rm frontend npx create-react-app . --template typescript
 
 ### 3. Levantar los servicios
 
+Para levantar todos los proyectos (backend, frontend, base de datos y nginx) juntos, ejecuta:
+
 ```bash
 docker compose up --build
 ```
+
+Esto construirá y levantará todos los servicios definidos en el archivo `docker-compose.yml`.
 
 ## 🌐 Servicios disponibles
 
